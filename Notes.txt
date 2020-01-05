@@ -1,0 +1,89 @@
+To compile C++ to Windows:
+https://docs.microsoft.com/en-us/cpp/build/walkthrough-compiling-a-native-cpp-program-on-the-command-line?view=vs-2019
+
+To compile C++ with QT:
+In the startup, search for Qt and select Qt 5.12.6 (MSVC 2017 64-bit)
+
+OK, just do this:
+Create new project in QT Creator
+Possibly edit in Visual Studio, is easier
+Build in QT creator
+(To find executable) https://stackoverflow.com/questions/25570752/how-to-make-exe-file-in-qt-creator
+https://wiki.qt.io/Deploy_an_Application_on_Windows
+EXAMPLE: C:\Qt\5.12.6\msvc2017_64\bin>windeployqt Release/NativeNotepad.05d8a368
+
+HOLY SHIT JUST SKIP TO THE SECOND SUGGESTION: https://stackoverflow.com/questions/24896749/how-to-build-a-qt-project-in-visual-studio-from-command-line
+
+Web scraping in C++: https://stackoverflow.com/questions/834768/options-for-web-scraping-c-version-only
+http://www.cplusplus.com/forum/unices/45878/
+https://www.hackthissite.org/articles/read/1078
+https://stackoverflow.com/questions/9786150/save-curl-content-result-into-a-string-in-c
+https://blog.laplante.io/2014/11/parsing-html-c-revisited/
+
+TO USE libxml2:
+https://stackoverflow.com/questions/4445418/how-to-add-additional-libraries-to-visual-studio-project
+https://docs.microsoft.com/en-us/cpp/build/adding-references-in-visual-cpp-projects?view=vs-2019
+Library here: "C:\libxml2-2.7.8.win32\libxml2-2.7.8.win32\include\libxml\"
+https://stackoverflow.com/questions/3831902/searching-nodes-libxml
+http://xmlsoft.org/tutorial/ar01s05.html
+http://www.xmlsoft.org/examples/tree1.c
+https://stackoverflow.com/questions/10363380/libxml2-can%C2%B4t-get-content-from-node
+
+AAAAAAAAGGGGGGGGHHHHHHHH JUST USE vcpkg
+https://devblogs.microsoft.com/cppblog/vcpkg-a-tool-to-acquire-and-build-c-open-source-libraries-on-windows/
+
+
+Writing to file: https://stackoverflow.com/questions/15388041/how-to-write-stdstring-to-file
+
+C Libraries in C: https://stackoverflow.com/questions/12066279/using-c-libraries-for-c-programs
+
+vcpkg: https://github.com/microsoft/vcpkg
+
+C:\Users\Brian\Documents\Coding\vcpkg>vcpkg integrate project
+Created nupkg: C:\Users\Brian\Documents\Coding\vcpkg\scripts\buildsystems\vcpkg.C.Users.Brian.Documents.Coding.vcpkg.1.0.0.nupkg
+
+With a project open, go to Tools->NuGet Package Manager->Package Manager Console and paste:
+    Install-Package vcpkg.C.Users.Brian.Documents.Coding.vcpkg -Source "C:\Users\Brian\Documents\Coding\vcpkg\scripts\buildsystems"
+
+https://stackoverflow.com/questions/32578513/nuget-not-updating-project-references
+
+Example:
+cl /EHsc /W4 *.cpp /link /out:CountVowelWin.exe
+OR
+MSBuild your_solution.sln /p:Configuration=Debug
+https://docs.microsoft.com/en-us/cpp/build/vcpkg?view=vs-2019#integrate-with-visual-studio-windows
+Make sure to run: vcpkg integrate install
+https://developercommunity.visualstudio.com/content/problem/740211/visual-studio-2019-1625-not-seeing-gtk-libraries-i.html
+
+Original Quora:
+https://www.quora.com/What-are-some-of-the-best-C-C++-projects-beginners-can-try
+
+Original Answer:
+Easy
+
+- Binary to Decimal and Back Converter - Develop a converter to convert a decimal number to binary or a binary number to its decimal equivalent.
+
+- Unit Converter (temp, currency, volume, mass and more) - Converts various units between one another. The user enters the type of unit being entered, the type of unit they want to convert to and then the value. The program will then make the conversion.
+
+- Count Vowels - Enter a string and the program counts the number of vowels in the text. For added complexity have it report a sum of each vowel found.
+
+- Check if Palindrome - Checks if the string entered by the user is a palindrome. That is that it reads the same forwards as backwards like “racecar”
+
+- Count Words in a String - Counts the number of individual words in a string. For added complexity read these strings in from a text file and generate a summary.
+
+
+Medium
+
+- Page Scraper - Create an application which connects to a site and pulls out all links, or images, and saves them to a list. Optional: Organize the indexed content and don’t allow duplicates. Have it put the results into an easily searchable index file.
+
+- Caesar cipher - Implement a Caesar cipher, both encoding and decoding. The key is an integer from 1 to 25. This cipher rotates the letters of the alphabet (A to Z). The encoding replaces each letter with the 1st to 25th next letter in the alphabet (wrapping Z to A). So key 2 encrypts "HI" to "JK", but key 20 encrypts "HI" to "BC". This simple "monoalphabetic substitution cipher" provides almost no security, because an attacker who has the encoded message can either use frequency analysis to guess the key, or just try all 25 keys.
+
+- PDF Generator - An application which can read in a text file, html file or some other file and generates a PDF file out of it. Great for a web based service where the user uploads the file and the program returns a PDF of the file. Optional: Deploy on GAE or Heroku if possible.
+
+
+Hard
+- Credit Card Validator - Takes in a credit card number from a common credit card vendor (Visa, MasterCard, American Express, Discoverer) and validates it to make sure that it is a valid number (look into how credit cards use a checksum).
+
+- Dijkstra’s Algorithm - Create a program that finds the shortest path through a graph using its edges.
+
+- Text Editor - Notepad style application that can open, edit, and save text documents. Optional: Add syntax highlighting and other features.

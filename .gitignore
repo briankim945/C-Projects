@@ -1,0 +1,27 @@
+**/Jupyter_Checks
+**/.vs
+/.vs
+**/libharu_demos/
+
+# Unnecessary Files
+*.exe
+*.out
+*.docx
+*.sln
+*.vcxproj
+*.vcxproj.filters
+*.vcxproj.user
+*.vcxproj*
+**/Target.txt
+**/Target2.txt
+
+# Compiled Folders
+build-NativeNotepad-Desktop_Qt_5_12_6_MSVC2017_64bit-Debug
+build-NativeNotepad-Desktop_Qt_5_12_6_MSVC2017_64bit-Release
+**/NativeNotepadCompile
+**/Debug
+**/Release
+**/x64
+**/CaesarEXE
+**/Releases
+**/packages
