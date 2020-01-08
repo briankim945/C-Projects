@@ -3,9 +3,6 @@
 
 #include <hpdf.h>
 #include <hpdf_types.h>
-//#include <hpdf_error.h>
-//#include <hpdf_doc.h>
-//#include <setjmp.h>
 
 #include <iostream>
 #include <fstream>
@@ -34,32 +31,41 @@ std::vector<std::string> string_split(std::string str)
 {
 	std::vector<std::string> vec;
 	std::string temp_word = "";
+	int start_int = 0;
+	int end_int;
 
-	for (unsigned int i = 0; i < str.length(); i++) {
-		char c = str[i];
+	unsigned int place = 0;
+	bool cycling = true;
+	while (cycling) {
+		char c = str[place];
 
 		//std::cout << c;
-
-		if (c < 0)
+		
+		if (place == str.size())
 		{
-			std::string s(1, c);
-			//std::cout << "Getting this write: " << s << std::endl;
-			temp_word += s;
+			vec.push_back(str.substr(start_int, place - start_int));
+			cycling = false;
+		}
+		else if (c < 0)
+		{
+			place++;
+			cycling = true;
 		}
 		else if (isspace(c))
 		{
-			vec.push_back(temp_word);
-			temp_word = "";
+			vec.push_back(str.substr(start_int, place - start_int));
+			place++;
+			start_int = place;
 		}
 		else
 		{
-			temp_word += c;
+			place++;
 		}
 	}
 
 	//std::cout << std::endl;
 
-	if (temp_word != "") { vec.push_back(temp_word); }
+	//if (temp_word != "") { vec.push_back(temp_word); }
 
 	return vec;
 }
@@ -79,62 +85,356 @@ std::vector<std::vector<std::string>> para_split(std::string str)
 	return vec;
 }
 
-void printWrapText(HPDF_Page page, HPDF_Font font, int height, std::vector<std::vector<std::string>> txt_data)
+void pageWrapText(HPDF_Page page, HPDF_Font font, int height, std::vector<std::vector<std::string>> txt_data)
 {
-	/*
-	bool page_incomplete = true;
-	
-	while (page_incomplete)
+	int ypos = HPDF_Page_GetHeight(page) - 60;
+	int write_width = HPDF_Page_GetWidth(page) - 120;
+	std::string first_word;
+	std::string print_line = "";
+	std::string temp_line = "";
+	int len;
+	bool reading_text = true;
+	int place = 0;
+
+	// Reading the original text vector
+	while (reading_text)
 	{
-		std::string newline;
-	}*/
-
-	int ypos = 800;
-	int char_height = HPDF_Font_GetCapHeight(font);
-
-	for (std::vector<std::string> line : txt_data) {
-		std::string print_line =  "";
-		for (std::string word : line) {
-			print_line += word + " ";
+		// Stops if the next line is beyond the size of the txt_data
+		if (place >= txt_data.size())
+		{
+			reading_text = false;
 		}
+		else
+		{
+			std::vector<std::string> line = txt_data[place];
+			bool is_reading_line = true;
+			int line_place = 0;
+			
+			// During the reading of the line
+			while (is_reading_line)
+			{
+				// If line is empty, doesn't print anything and just skips to the next spot.
+				if (line.size() <= 0)
+				{
+					ypos -= height;
+					is_reading_line = false;
+					place++;
+				}
+				// If line_place has reached the end of the line
+				else if (line_place == line.size())
+				{
+					is_reading_line = false;
+					place++;
+				}
+				// If line is not empty and we have not yet reached the end
+				else
+				{
+					// Gets the first word in the line
+					first_word = line[line_place];
+					// If the first word is longer than the width of the page, chops up the word between lines.
+					if (HPDF_Page_TextWidth(page, first_word.c_str()) > write_width)
+					{
+						bool cycling = true;
+						while (cycling)
+						{
+							len = HPDF_Page_MeasureText(page, first_word.c_str(), HPDF_Page_GetWidth(page) - 120,
+								HPDF_FALSE, NULL);
+							temp_line = first_word.substr(0, len);
 
-		//std::cout << print_line << std::endl;
-		//std::cout << char_height << std::endl;
+							HPDF_Page_BeginText(page);
+							HPDF_Page_SetFontAndSize(page, font, height);
+							HPDF_Page_MoveTextPos(page, 60, ypos);
+							HPDF_Page_ShowText(page, temp_line.c_str());
+							HPDF_Page_EndText(page);
 
-		/*
-		HPDF_Page_SetTextRenderingMode(pdf, HPDF_FILL);
-		HPDF_Page_BeginText(pdf);
-		HPDF_Page_TextOut(pdf, 0, ypos, print_line.c_str());
-		HPDF_Page_EndText(pdf);*/
+							ypos -= height;
 
-		HPDF_Page_MoveTextPos(page, 0, ypos);
-		HPDF_Page_SetFontAndSize(page, font, height);
-		HPDF_Page_ShowText(page, print_line.c_str());
+							std::cout << temp_line << std::endl;
 
-		ypos -= height;
+							if (len >= first_word.length())
+							{
+								cycling = false;
+								print_line = "";
+								temp_line = "";
+								first_word = "";
+							}
+							else
+							{
+								first_word = first_word.substr(len);
+							}
+						}
+
+						line_place++;
+					}
+					// If the first word is not longer than the page width
+					else
+					{
+						print_line = first_word;
+						line_place++;
+						bool cycling = true;
+
+						/*Cycles through words in the line until the length of the line is too great
+						or the line runs out.*/
+						while (cycling)
+						{
+							// In the event that we run out of line.
+							if (line_place >= line.size())
+							{
+								HPDF_Page_BeginText(page);
+								HPDF_Page_SetFontAndSize(page, font, height);
+								HPDF_Page_MoveTextPos(page, 60, ypos);
+								HPDF_Page_ShowText(page, print_line.c_str());
+								HPDF_Page_EndText(page);
+
+								ypos -= height;
+
+								cycling = false;
+								is_reading_line = false;
+								place++;
+							}
+							else
+							{
+								std::string word = line[line_place];
+								temp_line = print_line + " " + word;
+								len = HPDF_Page_TextWidth(page, temp_line.c_str());
+
+								// In the event that the length of the line is too great.
+								if (len > write_width)
+								{
+									HPDF_Page_BeginText(page);
+									HPDF_Page_SetFontAndSize(page, font, height);
+									HPDF_Page_MoveTextPos(page, 60, ypos);
+									HPDF_Page_ShowText(page, print_line.c_str());
+									HPDF_Page_EndText(page);
+
+									ypos -= height;
+
+									print_line = "";
+									temp_line = word + " ";
+									line_place++;
+
+									cycling = false;
+								}
+								// Updates print_line and moves on to the next word.
+								else
+								{
+									print_line = temp_line;
+									line_place++;
+								}
+							}
+						}
+					}
+				}
+			}
+		}
 	}
+}
 
-	/*
-	std::cout << HPDF_Font_MeasureText(font, (const HPDF_BYTE*) txt_data, (HPDF_UINT) ((std::string) txt_data).length(), (HPDF_REAL) 492,
-		(HPDF_REAL) 12, (HPDF_REAL) 0, (HPDF_REAL) 1, HPDF_FALSE, NULL) <<
-		std::endl;*/
+void pdfWrapText(HPDF_Doc pdf, HPDF_Font font, int height, std::vector<std::vector<std::string>> txt_data)
+{
+	HPDF_Page page;
+	page = HPDF_AddPage(pdf);
+	HPDF_Page_SetFontAndSize(page, font, 12);
+	HPDF_Page_SetTextRenderingMode(page, HPDF_FILL);
+	int ypos = HPDF_Page_GetHeight(page) - 60;
+	int write_width = HPDF_Page_GetWidth(page) - 120;
+	std::string first_word;
+	std::string print_line = "";
+	std::string temp_line = "";
+	int len;
+	bool reading_text = true;
+	int place = 0;
+
+	// Reading the original text vector
+	while (reading_text)
+	{
+		// Stops if the next line is beyond the size of the txt_data
+		if (place >= txt_data.size())
+		{
+			reading_text = false;
+		}
+		else
+		{
+			std::vector<std::string> line = txt_data[place];
+			bool is_reading_line = true;
+			int line_place = 0;
+
+			// During the reading of the line
+			while (is_reading_line)
+			{
+				// If line is empty, doesn't print anything and just skips to the next spot.
+				if (line.size() <= 0)
+				{
+					ypos -= height;
+
+					// CHECKING THAT WE DON'T GO OFF PAGE
+					if (ypos < 60)
+					{
+						page = HPDF_AddPage(pdf);
+						HPDF_Page_SetFontAndSize(page, font, 12);
+						HPDF_Page_SetTextRenderingMode(page, HPDF_FILL);
+						ypos = HPDF_Page_GetHeight(page) - 60;
+					}
+
+					is_reading_line = false;
+					place++;
+				}
+				// If line_place has reached the end of the line
+				else if (line_place == line.size())
+				{
+					if (!print_line.empty())
+					{
+						HPDF_Page_BeginText(page);
+						HPDF_Page_SetFontAndSize(page, font, height);
+						HPDF_Page_MoveTextPos(page, 60, ypos);
+						HPDF_Page_ShowText(page, print_line.c_str());
+						HPDF_Page_EndText(page);
+
+						ypos -= height;
+
+						// CHECKING THAT WE DON'T GO OFF PAGE
+						if (ypos < 60)
+						{
+							page = HPDF_AddPage(pdf);
+							HPDF_Page_SetFontAndSize(page, font, 12);
+							HPDF_Page_SetTextRenderingMode(page, HPDF_FILL);
+							ypos = HPDF_Page_GetHeight(page) - 60;
+						}
+					}
+
+					is_reading_line = false;
+					place++;
+				}
+				// If line is not empty and we have not yet reached the end
+				else
+				{
+					// Gets the first word in the line
+					first_word = line[line_place];
+					// If the first word is longer than the width of the page, chops up the word between lines.
+					if (HPDF_Page_TextWidth(page, first_word.c_str()) > write_width)
+					{
+						bool cycling = true;
+						while (cycling)
+						{
+							len = HPDF_Page_MeasureText(page, first_word.c_str(), HPDF_Page_GetWidth(page) - 120,
+								HPDF_FALSE, NULL);
+							temp_line = first_word.substr(0, len);
+
+							HPDF_Page_BeginText(page);
+							HPDF_Page_SetFontAndSize(page, font, height);
+							HPDF_Page_MoveTextPos(page, 60, ypos);
+							HPDF_Page_ShowText(page, temp_line.c_str());
+							HPDF_Page_EndText(page);
+
+							ypos -= height;
+
+							// CHECKING THAT WE DON'T GO OFF PAGE
+							if (ypos < 60)
+							{
+								page = HPDF_AddPage(pdf);
+								HPDF_Page_SetFontAndSize(page, font, 12);
+								HPDF_Page_SetTextRenderingMode(page, HPDF_FILL);
+								ypos = HPDF_Page_GetHeight(page) - 60;
+							}
+
+							if (len >= first_word.length())
+							{
+								cycling = false;
+								print_line = "";
+								temp_line = "";
+								first_word = "";
+							}
+							else
+							{
+								first_word = first_word.substr(len);
+							}
+						}
+
+						line_place++;
+					}
+					// If the first word is not longer than the page width
+					else
+					{
+						print_line = first_word;
+						line_place++;
+						bool cycling = true;
+
+						/*Cycles through words in the line until the length of the line is too great
+						or the line runs out.*/
+						while (cycling)
+						{
+							// In the event that we run out of line.
+							if (line_place >= line.size())
+							{
+								HPDF_Page_BeginText(page);
+								HPDF_Page_SetFontAndSize(page, font, height);
+								HPDF_Page_MoveTextPos(page, 60, ypos);
+								HPDF_Page_ShowText(page, print_line.c_str());
+								HPDF_Page_EndText(page);
+
+								ypos -= height;
+
+								// CHECKING THAT WE DON'T GO OFF PAGE
+								if (ypos < 60)
+								{
+									page = HPDF_AddPage(pdf);
+									HPDF_Page_SetFontAndSize(page, font, 12);
+									HPDF_Page_SetTextRenderingMode(page, HPDF_FILL);
+									ypos = HPDF_Page_GetHeight(page) - 60;
+								}
+
+								cycling = false;
+								is_reading_line = false;
+								place++;
+							}
+							else
+							{
+								std::string word = line[line_place];
+								temp_line = print_line + " " + word;
+								len = HPDF_Page_TextWidth(page, temp_line.c_str());
+
+								// In the event that the length of the line is too great.
+								if (len > write_width)
+								{
+									HPDF_Page_BeginText(page);
+									HPDF_Page_SetFontAndSize(page, font, height);
+									HPDF_Page_MoveTextPos(page, 60, ypos);
+									HPDF_Page_ShowText(page, print_line.c_str());
+									HPDF_Page_EndText(page);
+
+									ypos -= height;
+
+									// CHECKING THAT WE DON'T GO OFF PAGE
+									if (ypos < 60)
+									{
+										page = HPDF_AddPage(pdf);
+										HPDF_Page_SetFontAndSize(page, font, 12);
+										HPDF_Page_SetTextRenderingMode(page, HPDF_FILL);
+										ypos = HPDF_Page_GetHeight(page) - 60;
+									}
+
+									print_line = "";
+									temp_line = word + " ";
+
+									cycling = false;
+								}
+								// Updates print_line and moves on to the next word.
+								else
+								{
+									print_line = temp_line;
+									line_place++;
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
 }
 
 int main()
 {
-	// TESTING STRING SPLITTER
-	/*
-	std::vector<std::vector<std::string>> vec = 
-		para_split(
-			"Hello darkness my old friend.\nThis is the beginning of the end."
-		);
-	for (std::vector<std::string> line : vec) {
-		std::cout << "ONE LINE" << std::endl;
-		for (std::string word : line) {
-			std::cout << word << std::endl;
-		}
-	}*/
-
 	std::string file_name;
 	std::string file_content;
 
@@ -166,73 +466,25 @@ int main()
 
 			txt_file.close();
 
-			HPDF_Page page;
+			//HPDF_Page page;
 			HPDF_Font font;
 
-			page = HPDF_AddPage(pdf);
+			//page = HPDF_AddPage(pdf);
 			font = HPDF_GetFont(pdf, "Courier", NULL);
-			HPDF_Page_SetFontAndSize(page, font, 12);
-
-			std::cout << HPDF_Font_GetXHeight(font) << std::endl;
+			//HPDF_Page_SetFontAndSize(page, font, 12);
 			
-			HPDF_Page_SetTextRenderingMode(page, HPDF_FILL);
-			HPDF_Page_BeginText(page);
+			//HPDF_Page_SetTextRenderingMode(page, HPDF_FILL);
+			//HPDF_Page_BeginText(page);
+			//HPDF_Page_EndText(page);
 			//HPDF_Page_TextOut(page, 60, 800, "Hello! This is working!");
 			
 			std::vector<std::vector<std::string>> file_vec = para_split(file_content);
-			/*
-			HPDF_Page_MoveTextPos(page, 0, 800);
-			HPDF_Page_SetFontAndSize(page, font, 12);
-			HPDF_Page_ShowText(page, file_content.c_str());*/
 
-			//SEEING IF THIS WORKS
-			
-			int height = 12;
+			//pageWrapText(page, font, 12, file_vec);
+			pdfWrapText(pdf, font, 12, file_vec);
 
-			int ypos = HPDF_Page_GetHeight(page) - 60;
-			int char_height = HPDF_Font_GetCapHeight(font);
-			/*
-			std::string print_line = "";
-			for (std::string word : file_vec[0]) {
-				print_line += word + " ";
-			}
-
-			std::cout << print_line << std::endl;
-
-			for (int i = 0; i < 8; i++)
-			{
-				HPDF_Page_TextOut(page, 60, ypos - (i * 100), print_line.c_str());
-			}*/
-
-			
-			for (std::vector<std::string> line : file_vec) {
-				std::string print_line = "";
-				for (std::string word : line) {
-					print_line += word + " ";
-				}
-
-				std::cout << print_line << std::endl;
-				std::cout << char_height << std::endl;
-
-				std::cout << "printline: " << print_line << std::endl;
-				std::cout << "xpos: " << 0 << std::endl;
-				std::cout << "ypos: " << ypos << std::endl;
-				
-				HPDF_Page_MoveTextPos(page, 0, ypos);
-				HPDF_Page_SetFontAndSize(page, font, height);
-				HPDF_Page_ShowText(page, print_line.c_str());
-
-				ypos -= height;
-			}
-
-			//printWrapText(pdf, font, 12, file_vec);
-
-			HPDF_Page_EndText(page);
-
-			//std::cout << file_content << std::endl;
-			
-			std::cout << "Width: " << HPDF_Page_GetWidth(page) << std::endl;
-			std::cout << "Height: " << HPDF_Page_GetHeight(page) << std::endl;
+			//std::cout << "Width: " << HPDF_Page_GetWidth(page) << std::endl;
+			//std::cout << "Height: " << HPDF_Page_GetHeight(page) << std::endl;
 
 			try
 			{
