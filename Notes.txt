@@ -47,6 +47,10 @@ With a project open, go to Tools->NuGet Package Manager->Package Manager Console
 
 https://stackoverflow.com/questions/32578513/nuget-not-updating-project-references
 
+HOW TO CHECKSUM CREDIT CARD NUMBERS:
+https://smallbusiness.chron.com/validate-credit-card-information-43910.html
+https://www.rosettacode.org/wiki/Luhn_test_of_credit_card_numbers
+
 Example:
 cl /EHsc /W4 *.cpp /link /out:CountVowelWin.exe
 OR
