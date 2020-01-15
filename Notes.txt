@@ -59,6 +59,8 @@ https://docs.microsoft.com/en-us/cpp/build/vcpkg?view=vs-2019#integrate-with-vis
 Make sure to run: vcpkg integrate install
 https://developercommunity.visualstudio.com/content/problem/740211/visual-studio-2019-1625-not-seeing-gtk-libraries-i.html
 
+"(.*)(,)(^[0-9]+$)(,)(^[0-9]+$)(,)(<)(.*)(>)"
+
 Original Quora:
 https://www.quora.com/What-are-some-of-the-best-C-C++-projects-beginners-can-try
 
