@@ -40,4 +40,4 @@ I have been primarily coding in Visual Studio Community 2019.
 
 For GUI projects, I use QT 5.12.6 (MSVC 2017 64-bit)
 
-For work with PDF, I have been using the libHaru library.
+For work with PDF files, I have been using the libHaru library.
