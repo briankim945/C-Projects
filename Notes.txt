@@ -14,6 +14,9 @@ EXAMPLE: C:\Qt\5.12.6\msvc2017_64\bin>windeployqt Release/NativeNotepad.05d8a368
 
 HOLY SHIT JUST SKIP TO THE SECOND SUGGESTION: https://stackoverflow.com/questions/24896749/how-to-build-a-qt-project-in-visual-studio-from-command-line
 
+EXAMPLE (for TextEditor):
+C:\Users\Brian\Documents\Coding\C++ Projects\Hard\TextEditor>MSBuild TextEditor.sln /p:Configuration=Debug
+
 Web scraping in C++: https://stackoverflow.com/questions/834768/options-for-web-scraping-c-version-only
 http://www.cplusplus.com/forum/unices/45878/
 https://www.hackthissite.org/articles/read/1078
