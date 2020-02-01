@@ -1,4 +1,4 @@
-# C++ Projects
+# C++ Independent Projects
 A series of projects as I try to learn the ins and outs of the C++ language.
 
 # Background
