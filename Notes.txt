@@ -12,7 +12,7 @@ Build in QT creator
 https://wiki.qt.io/Deploy_an_Application_on_Windows
 EXAMPLE: C:\Qt\5.12.6\msvc2017_64\bin>windeployqt Release/NativeNotepad.05d8a368
 
-HOLY SHIT JUST SKIP TO THE SECOND SUGGESTION: https://stackoverflow.com/questions/24896749/how-to-build-a-qt-project-in-visual-studio-from-command-line
+SKIP TO THE SECOND SUGGESTION: https://stackoverflow.com/questions/24896749/how-to-build-a-qt-project-in-visual-studio-from-command-line
 
 EXAMPLE (for TextEditor):
 C:\Users\Brian\Documents\Coding\C++ Projects\Hard\TextEditor>MSBuild TextEditor.sln /p:Configuration=Debug
@@ -32,7 +32,7 @@ http://xmlsoft.org/tutorial/ar01s05.html
 http://www.xmlsoft.org/examples/tree1.c
 https://stackoverflow.com/questions/10363380/libxml2-can%C2%B4t-get-content-from-node
 
-AAAAAAAAGGGGGGGGHHHHHHHH JUST USE vcpkg
+JUST USE vcpkg
 https://devblogs.microsoft.com/cppblog/vcpkg-a-tool-to-acquire-and-build-c-open-source-libraries-on-windows/
 
 
